@@ -1,7 +1,11 @@
 let keyPress = "";
-let value = "";
-let operationValues = []
-let operator =""
+
+let calcObj = {
+    operationValues: [],
+    operator:"",
+    value:"",
+    result:""
+}
 
 function add(num1,num2){
     return num1+num2;
@@ -28,50 +32,74 @@ function operate(op,values){
         case "*":
             return multiply(values[0],values[1]);
         case "/":
-            return divide(values[0],values[1]);
+            return (values[1] === 0)? "ERR": divide(values[0],values[1]);
     }
 
 }
-
-function display(e){
+function displayValue(updateValue){
     const displayNum = document.querySelector(".display");
-    
+    displayNum.textContent = updateValue;
 
-    console.log(e.target.id )
+}
+function calculatorLogic(e){
+    
+    // if(calcObj.value !== '' && calcObj.result !==""){
+    //     console.log("Result Check: ", calcObj.result);
+    //     calcObj.operationValues.pop();
+    //     calcObj.result = "";
+    // }
 
     if(e.target.id !== ""){
-        if(e.target.id !== "del" && e.target.id !== "clear" && e.target.id !== "equals"){
-            operationValues.push(parseFloat(value));
-            operator = e.target.textContent;
-            console.log(operationValues.length)
-            if(operationValues.length==2){
-                value = operate(operator,operationValues);
-                operationValues = []
-                operationValues.push(parseFloat(value));
-                displayNum.textContent = value;
-                console.log(operationValues)
+
+        if(e.target.id === "equals"){  
+            calcObj.operationValues.push(parseInt(calcObj.value));
+
+            calcObj.value = operate(calcObj.operator,calcObj.operationValues);
+            calcObj.result = calcObj.value;
+
+            // console.log(calcObj.result,calcObj.operationValues);
+            // calcObj.operationValues.push(parseFloat(calcObj.result));
+            
+            displayValue(calcObj.value);
+            calcObj.operationValues = [];
+            // calcObj.value = '';
+
+        }else if(e.target.id === "clear"){
+            calcObj.operationValues = [];
+            calcObj.value = '';
+            displayValue(0);
+        }else if(e.target.id === "del"){
+            calcObj.value = calcObj.value.slice(0,-1);
+            displayValue(calcObj.value);
+        }else if(e.target.id === "negate"){
+            calcObj.value = -1 * parseFloat(calcObj.value);
+            displayValue(calcObj.value);
+        }else if(e.target.id === "decimal"){
+            if(calcObj.value.indexOf(".") == -1){
+                calcObj.value += e.target.textContent;
+                displayValue(calcObj.value);
+            }
+        }else{
+            calcObj.operationValues.push(parseFloat(calcObj.value));
+         
+            if(calcObj.operationValues.length==2){
+                calcObj.value = operate(calcObj.operator,calcObj.operationValues);
+                calcObj.operationValues = [];
+                calcObj.operationValues.push(parseFloat(calcObj.value));
+                displayValue(calcObj.value);
             }
 
-            value = '';
-            
-        }else if(e.target.id === "equals"){  
-            operationValues.push(parseInt(value));
-            value = operate(operator,operationValues);
-            displayNum.textContent = value;
-            operationValues = [];
-            
+            calcObj.operator = e.target.textContent;
+            calcObj.value = '';
+            console.log(calcObj.operator);
         }
     }else{
-        value += e.target.textContent;
-        displayNum.textContent = value;
+        calcObj.value += e.target.textContent;
+        displayValue(calcObj.value);
 
     }
   
-
-    // console.log('value is now: ',value )
-
-// console.log(value)
 }
 
 const keys = document.querySelectorAll('.keys');
-keys.forEach(key => key.addEventListener('click',display));
+keys.forEach(key => key.addEventListener('click',calculatorLogic));
